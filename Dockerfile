@@ -13,11 +13,6 @@
 # ============================================
 FROM node:20-alpine
 
-# Set production environment
-ENV NODE_ENV=production \
-    PORT=5000 \
-    HOST=0.0.0.0
-
 # Install runtime dependencies only
 RUN apk add --no-cache \
     dumb-init \
@@ -34,8 +29,14 @@ WORKDIR /app
 COPY package.json package-lock.json* ./
 
 # Install ALL dependencies (vite needed at runtime for serving frontend)
+# Do NOT set NODE_ENV=production yet so devDependencies are installed
 RUN npm ci --legacy-peer-deps && \
     npm cache clean --force
+
+# NOW set production environment after dependencies are installed
+ENV NODE_ENV=production \
+    PORT=5000 \
+    HOST=0.0.0.0
 
 # Copy pre-built artifacts from Replit
 COPY --chown=nodejs:nodejs dist ./dist
