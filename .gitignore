@@ -1,0 +1,11 @@
+node_modules/
+.DS_Store
+server/public
+vite.config.ts.*
+*.tar.gz
+.env
+*.log
+aws-deploy/
+deployment.tar.gz
+.replit
+replit.nix
