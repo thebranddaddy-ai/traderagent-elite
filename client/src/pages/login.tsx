@@ -27,8 +27,12 @@ export default function Login() {
         title: "Welcome Back!",
         description: "Successfully logged in. Redirecting to dashboard...",
       });
+      // Wait for auth state to update before redirecting
       await queryClient.refetchQueries({ queryKey: ["/api/auth/user"] });
-      setLocation("/");
+      // Small delay to ensure state propagation
+      setTimeout(() => {
+        window.location.href = "/";
+      }, 100);
     },
     onError: (error: any) => {
       toast({
