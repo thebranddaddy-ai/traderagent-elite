@@ -25,10 +25,9 @@ export function getSession() {
   const isProduction = process.env.NODE_ENV === 'production';
   const isBehindProxy = process.env.BEHIND_PROXY === 'true'; // Set this for ALB/Nginx
   
-  // Production with direct HTTPS: secure=true
-  // Production behind ALB/Nginx: secure=true (trust proxy handles X-Forwarded-Proto)
-  // Development: secure=false
-  const secureCookie = isProduction; // Always true in production (trust proxy makes it work)
+  // FIXED: Allow HTTP access in production (for direct IP access without HTTPS)
+  // Only require HTTPS if explicitly configured or behind a proxy
+  const secureCookie = isBehindProxy; // false for direct HTTP, true if behind HTTPS proxy
   
   return session({
     secret: process.env.SESSION_SECRET!,
@@ -58,10 +57,11 @@ export async function setupAuth(app: Express) {
   app.use(passport.session());
 
   const isProduction = process.env.NODE_ENV === 'production';
+  const isBehindProxy = process.env.BEHIND_PROXY === 'true';
   console.log("[Auth] Simple email/password authentication enabled");
   console.log("[Auth] Session store: PostgreSQL");
   console.log(`[Auth] Environment: ${isProduction ? 'PRODUCTION' : 'DEVELOPMENT'}`);
-  console.log(`[Auth] Cookie secure: ${isProduction ? 'true (HTTPS required)' : 'false (HTTP allowed)'}`);
+  console.log(`[Auth] Cookie secure: ${isBehindProxy ? 'true (HTTPS via proxy)' : 'false (HTTP direct access)'}`);
   console.log("[Auth] Trust proxy: ENABLED (ALB/Nginx compatible)");
 
   // Simple passport setup for email/password
